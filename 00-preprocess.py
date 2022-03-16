@@ -1,4 +1,4 @@
-
+# Created by Maximilian Hofer in March 2022
 
 # Import packages
 import pandas as pd
@@ -12,6 +12,7 @@ import requests
 import csv
 
 # Download data from Risky Data, hosted on Google Cloud
+# NB: You can replace the 'DATA_URL' variable with your own text data
 print('Downloading data.')
 DATA_URL = 'https://storage.googleapis.com/risky-data-open-source/ipo.csv'
 ipo_df = pd.read_csv(DATA_URL)
@@ -27,20 +28,19 @@ ipo_df.reset_index(inplace=True, drop=True)
 print('Full sample shape: {}'.format(ipo_df.shape))
 
 # Split data into paragraphs
-ipo_all = pd.concat([pd.Series(idx, row['RF_clean_paragraphs'].split('---new_paragraph---')) for idx, row in ipo_df.iterrows()]).reset_index()
+ipo_all = pd.concat([pd.Series(idx, row['RF_clean_paragraphs'].split('---new_paragraph---')) for idx, row in
+                     ipo_df.iterrows()]).reset_index()
 ipo_all.columns = ['RF', 'id']
 pars_all_raw = ipo_all['RF'].values
 
 print('All pars: {}'.format(ipo_all.shape))
 
+
 # Pre-processing
 def cleanData(pars):
     stemmer = SnowballStemmer(language='english')
 
-    # -----------------
-    # 1) lowercase, tokenize and remove punctuation/digits
-    # -----------------
-
+    # 1) Lowercase, tokenize and remove punctuation/digits
     pars_tokenized = []
 
     for par in pars:
@@ -56,10 +56,7 @@ def cleanData(pars):
     assert len(pars) == len(pars_tokenized), 'Data lost: tokenization'
     print('\tTokenization done.')
 
-    # -----------------
-    # 2) remove stop words
-    # -----------------
-
+    # 2) Remove stop words
     pars_stop = []
 
     stop_words = stopwords.words('english')
@@ -71,10 +68,7 @@ def cleanData(pars):
     assert len(pars) == len(pars_stop), 'Data lost'
     print('\tRemoving stop words done.')
 
-    # -----------------
-    # 3) keep nouns/adjectives/verbs/adverbs only
-    # -----------------
-
+    # 3) Keep nouns/adjectives/verbs/adverbs only
     pars_pos = []
 
     nlp = spacy.load('en_core_web_sm', disable=['parser', 'ner'])
@@ -92,10 +86,7 @@ def cleanData(pars):
     assert len(pars) == len(pars_pos), 'Data lost'
     print('\tPOS cleaning done.')
 
-    # -----------------
-    # 4) stem words
-    # -----------------
-
+    # 4) Stem words
     pars_stems = []
 
     for par in pars_pos:
@@ -126,10 +117,11 @@ def cleanData(pars):
 
     return pars_stems
 
+
 # Clean text data
 print('\nCleaning all paragraphs.')
 pars_all = cleanData(pars_all_raw)
 ipo_all['RF_clean_prePro_pars_all'] = pars_all
 
-# Write data to disk
+# Write data to disk for Step-01
 ipo_all.to_pickle('data/ipo_allText.pkl')

@@ -1,3 +1,4 @@
+# Created by Maximilian Hofer in March 2022
 
 # Import packages
 import gensim.corpora as corpora
@@ -5,12 +6,9 @@ from gensim.models import LdaModel
 from gensim.matutils import corpus2csc
 import pandas as pd
 
-
-# Constants
 SEED = 17
 
-# Load data
-
+# Load data from Step-00
 ipo_all = pd.read_pickle('data/ipo_allText.pkl')
 ipo_all.reset_index(inplace=True, drop=True)
 
@@ -38,6 +36,5 @@ ipo_allTopics.drop(labels=['RF', 'RF_clean_prePro_pars_all'], axis='columns', in
 
 print('Data shape with topics and IPO data: {}'.format(modelInference.shape))
 
-# Write to disk
+# Write data to disk for Step-02
 ipo_allTopics.to_pickle('data/ipo_allTopics.pkl')
-

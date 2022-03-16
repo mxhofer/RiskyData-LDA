@@ -30,7 +30,7 @@ We provide the Risky Data paper data in the `data/ipo.xlsx` file. You can replac
 To quantify textual risk factors, run the following scripts (in order):
 
 1. `00-preprocess.py`: cleans text data (tokenization, stemming, etc.)
-   1. Input: `data/ipo.xlsx`
+   1. Input: Download IPO data and store it as `data/ipo.csv` (URL in Python file)
    2. Output: `data/ipo_allText.pkl`
 2. `01-fit.py`: fits an LDA topic model and writes paragraph-level topic loadings to disk
    1. Input: `data/ipo_allText.pkl`

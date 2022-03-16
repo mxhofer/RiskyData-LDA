@@ -1,3 +1,4 @@
+# Created by Maximilian Hofer in March 2022
 
 # Import packages
 import pandas as pd
@@ -28,12 +29,12 @@ year_map = {
     2013: '2012-2013',
     2014: '2014-2015',
     2015: '2014-2015',
-    2016: '2016-2018', # 3 years!
+    2016: '2016-2018',  # 3 years!
     2017: '2016-2018',
     2018: '2016-2018',
 }
 
-# Load data
+# Load data from Step-01
 par_all = pd.read_pickle('data/ipo_allTopics.pkl')
 print('Paragraph data shape: {}'.format(par_all.shape))
 
@@ -47,8 +48,7 @@ ipo_data.reset_index(inplace=True, drop=True)
 print('IPO data shape after reset: {}'.format(ipo_data.shape))
 
 # Prepare dataset
-
-ipo_par = par_all.merge(ipo_data, how='left', left_on='id', right_index = True)
+ipo_par = par_all.merge(ipo_data, how='left', left_on='id', right_index=True)
 print('IPO data shape after merge: {}'.format(ipo_par.shape))
 
 # Add 2-year groups
@@ -71,7 +71,7 @@ ipo_data['id'] = ipo_data.index
 
 # Find row-wise maxima, i.e. dominant topics per paragraph
 # Why? because I make inference on paragraph-level (not document-level)
-dominant_pars = np.argmax(ipo_par.iloc[:, 1: K+1].values, axis=1)
+dominant_pars = np.argmax(ipo_par.iloc[:, 1: K + 1].values, axis=1)
 df = pd.DataFrame({'dom': dominant_pars})
 df = pd.get_dummies(df['dom'])
 LDA_PAR_dom = pd.concat([ipo_par[['id']], df], axis=1)
@@ -102,11 +102,12 @@ LDA_PAR_stds[cols] = LDA_PAR_stds[cols] + 1
 print('STD of groups: {}'.format(LDA_PAR_stds.shape))
 
 # Normalize
-cols_x = [str(i)+'_x' for i in range(K)]
-cols_y = [str(i)+'_y' for i in range(K)]
+cols_x = [str(i) + '_x' for i in range(K)]
+cols_y = [str(i) + '_y' for i in range(K)]
 
 # De-mean
-LDA_PAR_demeaned = LDA_PAR_dom.merge(LDA_PAR_means, how='left', left_on=['year_group', 'industry'], right_on=['year_group', 'industry'])
+LDA_PAR_demeaned = LDA_PAR_dom.merge(LDA_PAR_means, how='left', left_on=['year_group', 'industry'],
+                                     right_on=['year_group', 'industry'])
 df = pd.DataFrame(LDA_PAR_demeaned[cols_x].values - LDA_PAR_demeaned[cols_y].values)
 df['id'] = LDA_PAR_dom['id']
 df['industry'] = LDA_PAR_dom['industry']
@@ -114,7 +115,8 @@ df['year_group'] = LDA_PAR_dom['year_group']
 print('After de-meaning: {}'.format(df.shape))
 
 # Rescale
-LDA_PAR_std = df.merge(LDA_PAR_stds, how='left', left_on=['industry', 'year_group'], right_on=['industry', 'year_group'])
+LDA_PAR_std = df.merge(LDA_PAR_stds, how='left', left_on=['industry', 'year_group'],
+                       right_on=['industry', 'year_group'])
 
 LDA_PAR_z = pd.DataFrame(LDA_PAR_std[cols_x].values / LDA_PAR_std[cols_y].values)
 LDA_PAR_z.columns = ['rf{}'.format(i) for i in range(K)]  # rename normalized risk topic loadings
@@ -122,10 +124,9 @@ LDA_PAR_z['aggregate_risk'] = LDA_PAR_z[['rf{}'.format(i) for i in range(K)]].su
 LDA_PAR_z['id'] = LDA_PAR_dom['id']
 print('After rescaling: {}'.format(LDA_PAR_z.shape))
 
-LDA_PAR_out = LDA_PAR_z.merge(ipo_data_raw.drop(columns=['RF_clean_paragraphs'], axis=1), how='left', left_on='id', right_index=True, )
+LDA_PAR_out = LDA_PAR_z.merge(ipo_data_raw.drop(columns=['RF_clean_paragraphs'], axis=1), how='left', left_on='id',
+                              right_index=True, )
 print('Final shape: {}'.format(LDA_PAR_z.shape))
 
 # Write to disk
 LDA_PAR_out.to_excel('data/ipo_risk.xlsx')
-
-
