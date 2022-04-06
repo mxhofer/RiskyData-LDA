@@ -1,4 +1,4 @@
-# RiskyData-LDA
+# RiskyData-LDA Platform
 
 Copyright (c) 2022 Maximilian W. Hofer & Kenneth A. Younge.
 
