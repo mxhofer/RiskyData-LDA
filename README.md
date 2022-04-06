@@ -21,6 +21,10 @@ Create your own copy of the repository to experiment with OrgSim-RL freely.
 
 `pip install -r requirements.txt`
 
+NB: You might need to add the geckodriver such that Bokeh can save images in PNG format:
+
+`conda install -c conda-forge firefox geckodriver`
+
 ## Prepare input data
 
 We provide the Risky Data paper data in the `data/ipo.csv` file. You can replace this file with your own risk factor text as long as the column with text-based risk is split into paragraphs using the `---new_paragraph---` divider.
